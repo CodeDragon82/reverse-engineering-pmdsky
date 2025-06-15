@@ -22,3 +22,15 @@ To ensure that this documentation doesn't require a book worth of notes, I will 
 - Knowledge of common low-level vulnerabilities such as buffer overflows, format string vulnerabilities, etc.
 - A general understanding of assembly instructions.
 - An understanding of memory regions, specially within embedded systems.
+
+## Setup
+
+When we import the `.nds` file into Ghidra, the `Ndsware` Ghidra extension recognises it as an NDS ROM and selects the necessary language.
+
+![Load Window](images/load-window.png)
+
+Upon clicking "OK", the `Ndsware` loader, extracts the ARM9 code and overlay sections from the `.nds` file, and inserts them into memory at the correct base addresses. The loader also defines the other uninitialised regions of the memory map.
+
+![Memory Map](images/memory-map.png)
+
+Before running the auto analysis, we should decompile and mark the entry function at `0x2000800`. We should also rename the function as `entry`, so that the auto analysis identifies it as the entry.
