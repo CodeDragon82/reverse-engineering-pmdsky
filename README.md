@@ -105,3 +105,31 @@ void FUN_0201b33c(astruct_45 *param_1)
 ```
 
 These small clues scattered in different functions across the program can help us reconstruct definitions of structs. We can find all calls to `MI_CpuClear` and modified struct definitions as we go. This can be done for other similar functions like `MI_CpuFill` and `MI_CpuCopy`.
+
+## Identifying a Debug Logging Function
+
+Many of the defined strings appear to be logging/debugging messages for system events, such as `"sound resume\n"` and `"card backup error\n"`. Some messages are more specific to game events, such as `"MainGame enter dungeon mode %d %d\n"`. These strings are consistently referenced by a function at `0x0200c284`, which is called from various locations across the binary. In each case, the function receives a pointer in its first argument to one of these strings. This pattern strongly suggests that the function handles logging within the program.
+
+```c
+void FUN_0200c284(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+{
+    undefined1 auStack_118 [256];
+    undefined4 local_18;
+    undefined4 local_10;
+    undefined4 uStack_c;
+    undefined4 uStack_8;
+    undefined4 uStack_4;
+    
+    local_18 = param_4;
+    local_10 = param_1;
+    uStack_c = param_2;
+    uStack_8 = param_3;
+    uStack_4 = param_4;
+    FUN_020898dc(auStack_118,param_1,&uStack_c);
+    return;
+}
+```
+
+Identifying the function that handles logging messages is a vital step in reversing binary, because it can help us workout the roles of other functions. For example, in `FUN_Overlay11__02303f5c` there are several calls to log message about the selected option in a menu. Therefore, it's safe to assume that this function handles user input for a menu in the game.
+
+![Calls to the Logging Function](images/logging-function/calls-to-logging-function.png)
