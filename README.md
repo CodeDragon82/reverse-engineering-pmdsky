@@ -11,3 +11,14 @@ Due to legal reasons, I will not provide the `.nds` ROM for this game, nor do I 
 I'm aware that others have already reverse-engineered and documented various aspects of this game. However, the goal of this documentation is to walk the reader through the process of reverse-engineering a game like this. This documentation will also highlight challenges and discuss techniques used to overcome them.
 
 This research is currently a work in progress, so I'll be continuously adding to it and amend mistakes as I discover new information. It's worth noting that I'm new to reversing ARM binaries and DS games, so I'm likely to make bad assumptions from time to time. If I get anything wrong please feel free to reach out (via GitHub Issues) and let me know.
+
+## Prerequisite Knowledge
+
+To ensure that this documentation doesn't require a book worth of notes, I will be assumed that you have the following prerequisite knowledge:
+
+- A decent understanding of how to use Ghidra.
+- Familiarity with C consepts such as structs, enums, functions, pointers, global variables/constants, etc.
+- The ability to read and understand C code.
+- Knowledge of common low-level vulnerabilities such as buffer overflows, format string vulnerabilities, etc.
+- A general understanding of assembly instructions.
+- An understanding of memory regions, specially within embedded systems.
