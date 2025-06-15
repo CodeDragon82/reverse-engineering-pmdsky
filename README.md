@@ -1,2 +1,1 @@
-# reverse-engineering-pmdsky
-Reverse-engineering the 'Pokémon Mystery Dungeon: Explorers of Sky' Nintendo DS game.
+# Documenting the reverse-engineering process for *Pokemon Mystery Dungeon: Explorers of Sky*
