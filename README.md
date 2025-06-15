@@ -35,6 +35,46 @@ Upon clicking "OK", the `Ndsware` loader, extracts the ARM9 code and overlay sec
 
 Before running the auto analysis, we should decompile and mark the entry function at `0x2000800`. We should also rename the function as `entry`, so that the auto analysis identifies it as the entry.
 
+## Challenges
+
+Before delving into the analysis of this binary, we should first lay out some of the challenges that we will need to overcome.
+
+### Challenge 1 - No Symbols
+
+Firstly, the binary is stripped, which means we don't have symbols, including function or global variable names. As a result, we need to make educated guesses about the roles of each function by analysing how data is operated on and by examining references to defined strings for contextual clues.
+
+### Challenge 2 - No Struct Definitions
+
+Secondly, the binary is missing structure definitions, so we need to identify and reconstruct these structs manually. If there's a variable in a function that is referenced with offset values, then it's likely that the variable is a struct. For example, in the function below we can see that `param_1` is dereferenced with offsets. This is generally a clear indication that `param_1` is likely a struct and the offsets are fields with that struct.
+
+![Example of function without struct](images/function-without-struct.png)
+
+We can utilise Ghidra's "Auto Create Structure" option (when right-clicking on the variable) to automatically create/reconstruct parts of the struct definition.
+
+![Example of function with struct](images/function-with-struct.png)
+
+We can also work out the true size of a struct by looking for functions that appear to initial the struct. In some cases, there maybe calls to functions like `memset` and `malloc` to initial the struct memory, and the `size` parameter of these calls can tell us size of the struct.
+
+### Challenge 3 - Indirect References
+
+Thirdly, as we'll see later on, there are lots of global variables/constants that are referenced indirectly. In other words, functions dereference global pointers that point to other global variables/constants. This is especially difficult when dealing with defined strings. Functions never reference the define string directly, but instead reference a global pointer that points to the defined string. These global pointers are typed as `undefined4 *` instead of `char *` which means that the decompiled code doesn't recognise the defined string. To fix this issue we have to manually find these global pointers and retype them to `char *`. This is obviously going to be very time-consuming. 
+
+In the example below, we can see that the function references a global variable of type `undefined4`.
+
+![Global Pointer Example](images/global-pointer.png)
+
+However, the global variable is actual a pointer to a defined (global) string, so we need to retype it to `char *`.
+
+![Defined String Example](images/defined-string.png)
+
+### Challenge 4 - Indirect Function Calls
+
+Finally, in some cases, functions are referenced through global pointers and these functions are called by dereferencing the global pointer. Once again this can make it difficult to identify function calls if the global pointers are not typed correctly, and most cases they're not. Also, if these global variables are not typed as pointers, the function being called will have missing incoming references, as shown in the example below.
+
+![No Incoming References](images/no-incoming-references.png)
+
+*It should be noted that this is all guess work and there's no perfect way to obtain the original symbols and struct definitions.*
+
 ## Identifying Standard (Nitro SDK) Functions
 
 Before continuing, it's important to explain what we mean by standard functions in the context of Nintendo DS games. In typically C-based binaries, standard functions refer to functions that are implemented in `libc` such as `memset`, `memcpy`, `strcpy`, `strcmp`, `printf`, `puts`, `gets`, etc. However, Nitendo DS games instead use a custom set of standard functions defined in the [Nitro SDK](https://twlsdk.randommeaninglesscharacters.com/docs/nitro/NitroSDK/index.html). The Nitro SDK contains custom implementations of the many of these `libc` functions. For example, instead of `memset` and `memcpy`, the SDK contains [`MI_CpuFill`](https://twlsdk.randommeaninglesscharacters.com/docs/nitro/NitroSDK/mi/memory/MI_CpuFill.html) and [`MI_CpuCopy`](https://twlsdk.randommeaninglesscharacters.com/docs/nitro/NitroSDK/mi/memory/MI_CpuCopy.html). It also contains functions for handling 2D/3D graphics, interacting with the operating system, accessing game files stored on the ROM, and many other aspects of the Nintendo DS.
