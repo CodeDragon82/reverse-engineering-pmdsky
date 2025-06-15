@@ -27,11 +27,11 @@ To ensure that this documentation doesn't require a book worth of notes, I will 
 
 When we import the `.nds` file into Ghidra, the `Ndsware` Ghidra extension recognises it as an NDS ROM and selects the necessary language.
 
-![Load Window](images/load-window.png)
+![Load Window](images/setup/load-window.png)
 
 Upon clicking "OK", the `Ndsware` loader, extracts the ARM9 code and overlay sections from the `.nds` file, and inserts them into memory at the correct base addresses. The loader also defines the other uninitialised regions of the memory map.
 
-![Memory Map](images/memory-map.png)
+![Memory Map](images/setup/memory-map.png)
 
 Before running the auto analysis, we should decompile and mark the entry function at `0x2000800`. We should also rename the function as `entry`, so that the auto analysis identifies it as the entry.
 
@@ -47,11 +47,11 @@ Firstly, the binary is stripped, which means we don't have symbols, including fu
 
 Secondly, the binary is missing structure definitions, so we need to identify and reconstruct these structs manually. If there's a variable in a function that is referenced with offset values, then it's likely that the variable is a struct. For example, in the function below we can see that `param_1` is dereferenced with offsets. This is generally a clear indication that `param_1` is likely a struct and the offsets are fields with that struct.
 
-![Example of function without struct](images/function-without-struct.png)
+![Example of function without struct](images/challenges/function-without-struct.png)
 
 We can utilise Ghidra's "Auto Create Structure" option (when right-clicking on the variable) to automatically create/reconstruct parts of the struct definition.
 
-![Example of function with struct](images/function-with-struct.png)
+![Example of function with struct](images/challenges/function-with-struct.png)
 
 We can also work out the true size of a struct by looking for functions that appear to initial the struct. In some cases, there maybe calls to functions like `memset` and `malloc` to initial the struct memory, and the `size` parameter of these calls can tell us size of the struct.
 
@@ -61,17 +61,17 @@ Thirdly, as we'll see later on, there are lots of global variables/constants tha
 
 In the example below, we can see that the function references a global variable of type `undefined4`.
 
-![Global Pointer Example](images/global-pointer.png)
+![Global Pointer Example](images/challenges/global-pointer.png)
 
 However, the global variable is actual a pointer to a defined (global) string, so we need to retype it to `char *`.
 
-![Defined String Example](images/defined-string.png)
+![Defined String Example](images/challenges/defined-string.png)
 
 ### Challenge 4 - Indirect Function Calls
 
 Finally, in some cases, functions are referenced through global pointers and these functions are called by dereferencing the global pointer. Once again this can make it difficult to identify function calls if the global pointers are not typed correctly, and most cases they're not. Also, if these global variables are not typed as pointers, the function being called will have missing incoming references, as shown in the example below.
 
-![No Incoming References](images/no-incoming-references.png)
+![No Incoming References](images/challenges/no-incoming-references.png)
 
 *It should be noted that this is all guess work and there's no perfect way to obtain the original symbols and struct definitions.*
 
