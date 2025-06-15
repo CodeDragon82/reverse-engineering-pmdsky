@@ -133,3 +133,15 @@ void FUN_0200c284(undefined4 param_1,undefined4 param_2,undefined4 param_3,undef
 Identifying the function that handles logging messages is a vital step in reversing binary, because it can help us workout the roles of other functions. For example, in `FUN_Overlay11__02303f5c` there are several calls to log message about the selected option in a menu. Therefore, it's safe to assume that this function handles user input for a menu in the game.
 
 ![Calls to the Logging Function](images/logging-function/calls-to-logging-function.png)
+
+## Game Files
+
+As well as the game code, the NDS ROM also has a file system. This file system contains many files with game data, including sounds, graphics (such as textures, sprites, colour palettes), character states, item information, etc. Understanding the game files and what they contain is a key part of reverse-engineering the game. In version 1.1.0 of [Ndsware](https://github.com/CodeDragon82/nds-ware), the Ghidra extension has an option under the "Nds" toolbar menu to "Show Files". This shows all files and folders contained in the NDS ROM, along with the file data.
+
+![NDS File System](images/game-files/file-system.png)
+
+In this section, we will aim to identify key files in game, understand their data format, what they contain, how they are used in the binary, and what function use them.
+
+Reading game files can be challenging because many of them use custom or proprietary file formats. If a file includes magic bytes at the beginning, we can search for those bytes online to find documentation or articles describing the format. For example, in the screenshot above, `title_1.bgp` starts with the magic bytes `AT4PX`, which is a compressed image format from Nintendo. If a file doesn't contain magic bytes, we may need to manually reverse-engineer the format by analysing patterns such as length fields, strings, and other byte patterns. Tools like [Kaitai](https://kaitai.io/) can be used to define the structure of a format once it's been worked out. Fortunately, someone else has already done the hard work and documented the file formats in the *Pokemon Mystery Dungeon* games: https://projectpokemon.org/home/docs/mystery-dungeon-nds/at4px-file-format-r40/
+
+For the purpose of this documentation I will not will explaining each of the file formats. One, this would take far to long, and two, the person who wrote the article has done a very good job at already explaining the format of these files. "We stand on the shoulders of giants". However, I will build on this person's research by developing scripts to parse out the data from these custom files. For this, I'll use Kaitai to define file formats and then use the Kaitai compiler to generate Python parsers.
