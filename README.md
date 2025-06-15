@@ -1,3 +1,5 @@
+![Title Image](images/pmdsky-title.png)
+
 # Documenting the reverse-engineering process for *Pokemon Mystery Dungeon: Explorers of Sky*
 
 ## Introduction
